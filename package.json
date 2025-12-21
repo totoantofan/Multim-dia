@@ -1,6 +1,7 @@
 {
-  "name": "multim-dia",
+  "name": "multim-dia-bot",
   "version": "1.0.0",
+  "description": "Bot Discord avec rappel automatique",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
