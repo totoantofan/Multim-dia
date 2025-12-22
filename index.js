@@ -7,7 +7,6 @@ require('dotenv').config();
 global.maintenance = false;
 global.protect = false;
 
-// Création du client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -17,10 +16,9 @@ const client = new Client({
   ]
 });
 
-// Collection des commandes
 client.commands = new Collection();
 
-// Chargement des commandes
+// Charger les commandes
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
@@ -29,7 +27,20 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-// Chargement des events
+// Gérer les interactions
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'Erreur lors de la commande.', ephemeral: true });
+  }
+});
+
+// Charger les événements
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
@@ -38,10 +49,8 @@ for (const file of eventFiles) {
   client.on(event.name, (...args) => event.execute(...args, client));
 }
 
-// Quand le bot est prêt
 client.once('ready', () => {
-  console.log(`Bot connecté en tant que ${client.user.tag}`);
+  console.log(`✅ Bot connecté en tant que ${client.user.tag}`);
 });
 
-// Connexion du bot
 client.login(process.env.TOKEN);
