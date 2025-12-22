@@ -15,14 +15,14 @@ module.exports = {
 
     if (etat === 'on') {
       global.protect = true;
-      return interaction.reply('🛡️ Protection anti-raid **activée**.');
+      return interaction.reply('🛡️ Protection anti-raid activée.');
     }
 
     if (etat === 'off') {
       global.protect = false;
-      return interaction.reply('❌ Protection anti-raid **désactivée**.');
+      return interaction.reply('❌ Protection anti-raid désactivée.');
     }
 
-    return interaction.reply('Utilise `on` ou `off`.');
+    return interaction.reply('❌ Utilise `on` ou `off`.');
   },
 };
