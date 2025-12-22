@@ -7,7 +7,6 @@ module.exports = {
 
     const now = Date.now();
     joins.push(now);
-
     joins = joins.filter(t => now - t < 10000);
 
     if (joins.length >= 5) {
