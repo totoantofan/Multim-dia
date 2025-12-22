@@ -1,52 +1,47 @@
-const express = require("express");
-const app = express();
+const fs = require('fs');
+const path = require('path');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
+require('dotenv').config();
 
-app.get("/", (req, res) => res.send("Bot en ligne"));
-app.listen(3000);
+// Variables globales
+global.maintenance = false;
+global.protect = false;
 
-const { Client, GatewayIntentBits } = require("discord.js");
-require("dotenv").config();
-
+// Création du client
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ],
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers
+  ]
 });
 
-client.once("ready", () => {
+// Collection des commandes
+client.commands = new Collection();
+
+// Chargement des commandes
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.data.name, command);
+}
+
+// Chargement des events
+const eventsPath = path.join(__dirname, 'events');
+const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+  const event = require(`./events/${file}`);
+  client.on(event.name, (...args) => event.execute(...args, client));
+}
+
+// Quand le bot est prêt
+client.once('ready', () => {
   console.log(`Bot connecté en tant que ${client.user.tag}`);
 });
 
-// Liste des mots interdits
-const bannedWords = ["pute", "fdp", "ntm", "tg", "merde"];
-
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
-
-  const content = message.content.toLowerCase();
-
-  // Détection d'insultes
-  if (bannedWords.some(word => content.includes(word))) {
-    message.delete();
-    message.channel.send(`⚠️ ${message.author}, ton message contenait un mot interdit.`);
-  }
-
-  // Détection de spam (5 messages en 5 secondes)
-  if (!client.spamMap) client.spamMap = new Map();
-
-  const now = Date.now();
-  const userMessages = client.spamMap.get(message.author.id) || [];
-  const filtered = userMessages.filter(t => now - t < 5000);
-
-  filtered.push(now);
-  client.spamMap.set(message.author.id, filtered);
-
-  if (filtered.length >= 5) {
-    message.channel.send(`🚫 ${message.author} a été détecté pour spam.`);
-    message.member.timeout(10_000, "Spam détecté");
-  }
-});
-
+// Connexion du bot
 client.login(process.env.TOKEN);
