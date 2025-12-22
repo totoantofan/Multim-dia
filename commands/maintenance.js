@@ -15,14 +15,14 @@ module.exports = {
 
     if (etat === 'on') {
       global.maintenance = true;
-      return interaction.reply('🛠️ Mode maintenance **activé**. Personne ne peut écrire.');
+      return interaction.reply('🛠️ Maintenance activée : les messages seront bloqués.');
     }
 
     if (etat === 'off') {
       global.maintenance = false;
-      return interaction.reply('✅ Mode maintenance **désactivé**. Tout redevient normal.');
+      return interaction.reply('✅ Maintenance désactivée : tout redevient normal.');
     }
 
-    return interaction.reply('Utilise `on` ou `off`.');
+    return interaction.reply('❌ Utilise `on` ou `off`.');
   },
 };
